@@ -1,9 +1,11 @@
 #include <windows.h>
 #include <stdio.h>
-
 #include <mmdeviceapi.h>
 #include <devicetopology.h>
 #include <WinUser.h>
+#include <iostream>
+#include <fstream>
+#include "INIReader.h"
 
 HRESULT WalkTreeBackwardsFromPart(IPart* pPart);
 HRESULT DisplayMute(IAudioMute* pMute);
@@ -184,6 +186,20 @@ HRESULT DisplayMute(IAudioMute* pMute) {
 int main()
 {
     ShowWindow(GetConsoleWindow(), SW_HIDE);
+    INIReader reader("config.ini");
+    if (reader.ParseError() != 0) {
+        printf("Can't load 'config.ini'\n");
+        std::ofstream ConfigFile("config.ini");
+        ConfigFile << "[keys]\n";
+        ConfigFile << "onMute=0x82\n";
+        ConfigFile << "onUnmute=0x82\n";
+        ConfigFile << "; Here are all key codes: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes\n";
+        ConfigFile << "; By default, both keys are f19\n";
+        printf("Succesfully created config file\n");
+    }
+    printf("Config loaded from 'config.ini'");
+    int muteKeyCode = reader.GetInteger("keys", "onMute", 0x82); // virtual key-code to simulate on mute
+    int unmuteKeyCode = reader.GetInteger("keys", "onUnmute", 0x82); // virtual key-code to simulate on unmute
     int currentMicMuteStatus = getMicrophoneMuteStatus();
     int oldCurrentMicMuteStatus = currentMicMuteStatus;
     while (true)
@@ -193,16 +209,32 @@ int main()
         currentMicMuteStatus = getMicrophoneMuteStatus();
         if (oldCurrentMicMuteStatus != currentMicMuteStatus)
         {
-            INPUT inp;
-            inp.type = INPUT_KEYBOARD;
-            inp.ki.wScan = 0;
-            inp.ki.time = 0;
-            inp.ki.dwExtraInfo = 0;
-            inp.ki.wVk = 0x82; // virtual-key code for the "f19" key
-            inp.ki.dwFlags = 0; // 0 for key press
-            SendInput(1, &inp, sizeof(INPUT));
-            inp.ki.dwFlags = KEYEVENTF_KEYUP;
-            SendInput(1, &inp, sizeof(INPUT));
+            if (currentMicMuteStatus == 0)
+            {
+                INPUT inp;
+                inp.type = INPUT_KEYBOARD;
+                inp.ki.wScan = 0;
+                inp.ki.time = 0;
+                inp.ki.dwExtraInfo = 0;
+                inp.ki.wVk = muteKeyCode; // virtual-key code
+                inp.ki.dwFlags = 0; // 0 for key press
+                SendInput(1, &inp, sizeof(INPUT));
+                inp.ki.dwFlags = KEYEVENTF_KEYUP; // for key release
+                SendInput(1, &inp, sizeof(INPUT));
+            }
+            else
+            {
+                INPUT inp;
+                inp.type = INPUT_KEYBOARD;
+                inp.ki.wScan = 0;
+                inp.ki.time = 0;
+                inp.ki.dwExtraInfo = 0;
+                inp.ki.wVk = unmuteKeyCode; // virtual-key code
+                inp.ki.dwFlags = 0; // 0 for key press
+                SendInput(1, &inp, sizeof(INPUT));
+                inp.ki.dwFlags = KEYEVENTF_KEYUP; // for key release
+                SendInput(1, &inp, sizeof(INPUT));
+            }
         }
     }
     return 0;
