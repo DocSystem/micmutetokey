@@ -190,21 +190,24 @@ int main()
     if (reader.ParseError() != 0) {
         printf("Can't load 'config.ini'\n");
         std::ofstream ConfigFile("config.ini");
-        ConfigFile << "[keys]\n";
+        ConfigFile << "[General]\n";
+        ConfigFile << "refreshRate\n\n";
+        ConfigFile << "[Keys]\n";
         ConfigFile << "onMute=0x82\n";
         ConfigFile << "onUnmute=0x82\n";
         ConfigFile << "; Here are all key codes: https://docs.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes\n";
         ConfigFile << "; By default, both keys are f19\n";
         printf("Succesfully created config file\n");
     }
-    printf("Config loaded from 'config.ini'");
-    int muteKeyCode = reader.GetInteger("keys", "onMute", 0x82); // virtual key-code to simulate on mute
-    int unmuteKeyCode = reader.GetInteger("keys", "onUnmute", 0x82); // virtual key-code to simulate on unmute
+    printf("Config loaded from 'config.ini'\n");
+    int muteKeyCode = reader.GetInteger("Keys", "onMute", 0x82); // virtual key-code to simulate on mute
+    int unmuteKeyCode = reader.GetInteger("Keys", "onUnmute", 0x82); // virtual key-code to simulate on unmute
+    int refreshRate = 1000 / reader.GetInteger("General", "refreshRate", 100);
     int currentMicMuteStatus = getMicrophoneMuteStatus();
     int oldCurrentMicMuteStatus = currentMicMuteStatus;
     while (true)
     {
-        Sleep(10);
+        Sleep(refreshRate);
         oldCurrentMicMuteStatus = currentMicMuteStatus;
         currentMicMuteStatus = getMicrophoneMuteStatus();
         if (oldCurrentMicMuteStatus != currentMicMuteStatus)
