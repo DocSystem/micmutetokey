@@ -16,6 +16,8 @@ https://github.com/benhoyt/inih
 #ifndef __INI_H__
 #define __INI_H__
 
+#pragma warning(disable : 4996)
+
 /* Make this header file easier to include in C++ code */
 #ifdef __cplusplus
 extern "C" {
@@ -23,53 +25,53 @@ extern "C" {
 
 #include <stdio.h>
 
-    /* Typedef for prototype of handler function. */
-    typedef int (*ini_handler)(void* user, const char* section,
-        const char* name, const char* value);
+/* Typedef for prototype of handler function. */
+typedef int (*ini_handler)(void* user, const char* section,
+                           const char* name, const char* value);
 
-    /* Typedef for prototype of fgets-style reader function. */
-    typedef char* (*ini_reader)(char* str, int num, void* stream);
+/* Typedef for prototype of fgets-style reader function. */
+typedef char* (*ini_reader)(char* str, int num, void* stream);
 
-    /* Parse given INI-style file. May have [section]s, name=value pairs
-       (whitespace stripped), and comments starting with ';' (semicolon). Section
-       is "" if name=value pair parsed before any section heading. name:value
-       pairs are also supported as a concession to Python's configparser.
+/* Parse given INI-style file. May have [section]s, name=value pairs
+   (whitespace stripped), and comments starting with ';' (semicolon). Section
+   is "" if name=value pair parsed before any section heading. name:value
+   pairs are also supported as a concession to Python's configparser.
 
-       For each name=value pair parsed, call handler function with given user
-       pointer as well as section, name, and value (data only valid for duration
-       of handler call). Handler should return nonzero on success, zero on error.
+   For each name=value pair parsed, call handler function with given user
+   pointer as well as section, name, and value (data only valid for duration
+   of handler call). Handler should return nonzero on success, zero on error.
 
-       Returns 0 on success, line number of first error on parse error (doesn't
-       stop on first error), -1 on file open error, or -2 on memory allocation
-       error (only when INI_USE_STACK is zero).
-    */
-    int ini_parse(const char* filename, ini_handler handler, void* user);
+   Returns 0 on success, line number of first error on parse error (doesn't
+   stop on first error), -1 on file open error, or -2 on memory allocation
+   error (only when INI_USE_STACK is zero).
+*/
+int ini_parse(const char* filename, ini_handler handler, void* user);
 
-    /* Same as ini_parse(), but takes a FILE* instead of filename. This doesn't
-       close the file when it's finished -- the caller must do that. */
-    int ini_parse_file(FILE* file, ini_handler handler, void* user);
+/* Same as ini_parse(), but takes a FILE* instead of filename. This doesn't
+   close the file when it's finished -- the caller must do that. */
+int ini_parse_file(FILE* file, ini_handler handler, void* user);
 
-    /* Same as ini_parse(), but takes an ini_reader function pointer instead of
-       filename. Used for implementing custom or string-based I/O. */
-    int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
-        void* user);
+/* Same as ini_parse(), but takes an ini_reader function pointer instead of
+   filename. Used for implementing custom or string-based I/O. */
+int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
+                     void* user);
 
-    /* Nonzero to allow multi-line value parsing, in the style of Python's
-       configparser. If allowed, ini_parse() will call the handler with the same
-       name for each subsequent line parsed. */
+/* Nonzero to allow multi-line value parsing, in the style of Python's
+   configparser. If allowed, ini_parse() will call the handler with the same
+   name for each subsequent line parsed. */
 #ifndef INI_ALLOW_MULTILINE
 #define INI_ALLOW_MULTILINE 1
 #endif
 
-       /* Nonzero to allow a UTF-8 BOM sequence (0xEF 0xBB 0xBF) at the start of
-          the file. See http://code.google.com/p/inih/issues/detail?id=21 */
+/* Nonzero to allow a UTF-8 BOM sequence (0xEF 0xBB 0xBF) at the start of
+   the file. See http://code.google.com/p/inih/issues/detail?id=21 */
 #ifndef INI_ALLOW_BOM
 #define INI_ALLOW_BOM 1
 #endif
 
-          /* Nonzero to allow inline comments (with valid inline comment characters
-             specified by INI_INLINE_COMMENT_PREFIXES). Set to 0 to turn off and match
-             Python 3.2+ configparser behaviour. */
+/* Nonzero to allow inline comments (with valid inline comment characters
+   specified by INI_INLINE_COMMENT_PREFIXES). Set to 0 to turn off and match
+   Python 3.2+ configparser behaviour. */
 #ifndef INI_ALLOW_INLINE_COMMENTS
 #define INI_ALLOW_INLINE_COMMENTS 1
 #endif
@@ -77,7 +79,7 @@ extern "C" {
 #define INI_INLINE_COMMENT_PREFIXES ";"
 #endif
 
-             /* Nonzero to use stack, zero to use heap (malloc/free). */
+/* Nonzero to use stack, zero to use heap (malloc/free). */
 #ifndef INI_USE_STACK
 #define INI_USE_STACK 1
 #endif
@@ -145,7 +147,7 @@ inline static char* find_chars_or_comment(const char* s, const char* chars)
 #if INI_ALLOW_INLINE_COMMENTS
     int was_space = 0;
     while (*s && (!chars || !strchr(chars, *s)) &&
-        !(was_space && strchr(INI_INLINE_COMMENT_PREFIXES, *s))) {
+           !(was_space && strchr(INI_INLINE_COMMENT_PREFIXES, *s))) {
         was_space = isspace((unsigned char)(*s));
         s++;
     }
@@ -167,7 +169,7 @@ inline static char* strncpy0(char* dest, const char* src, size_t size)
 
 /* See documentation in header file. */
 inline int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
-    void* user)
+                     void* user)
 {
     /* Uses a fair bit of stack (use heap instead if you need to) */
 #if INI_USE_STACK
@@ -199,8 +201,8 @@ inline int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler
         start = line;
 #if INI_ALLOW_BOM
         if (lineno == 1 && (unsigned char)start[0] == 0xEF &&
-            (unsigned char)start[1] == 0xBB &&
-            (unsigned char)start[2] == 0xBF) {
+                           (unsigned char)start[1] == 0xBB &&
+                           (unsigned char)start[2] == 0xBF) {
             start += 3;
         }
 #endif
@@ -214,10 +216,10 @@ inline int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler
         else if (*prev_name && *start && start > line) {
 
 #if INI_ALLOW_INLINE_COMMENTS
-            end = find_chars_or_comment(start, NULL);
-            if (*end)
-                *end = '\0';
-            rstrip(start);
+        end = find_chars_or_comment(start, NULL);
+        if (*end)
+            *end = '\0';
+        rstrip(start);
 #endif
 
             /* Non-blank line with leading whitespace, treat as continuation
@@ -321,7 +323,7 @@ public:
 
     // Construct INIReader and parse given file. See ini.h for more info
     // about the parsing.
-    INIReader(FILE* file);
+    INIReader(FILE *file);
 
     // Return the result of ini_parse(), i.e., 0 on success, line number of
     // first error on parse error, or -1 on file open error.
@@ -332,7 +334,7 @@ public:
 
     // Get a string value from INI file, returning default_value if not found.
     std::string Get(std::string section, std::string name,
-        std::string default_value) const;
+                    std::string default_value) const;
 
     // Get an integer (long) value from INI file, returning default_value if
     // not found or not a valid integer (decimal "1234", "-1234", or hex "0x4d2").
@@ -347,7 +349,7 @@ public:
     // default_value if not found or not a valid floating point value
     // according to strtof().
     float GetFloat(std::string section, std::string name, float default_value) const;
-
+  
     // Get a boolean value from INI file, returning default_value if not found or if
     // not a valid true/false value. Valid true values are "true", "yes", "on", "1",
     // and valid false values are "false", "no", "off", "0" (not case sensitive).
@@ -359,7 +361,7 @@ protected:
     std::set<std::string> _sections;
     static std::string MakeKey(std::string section, std::string name);
     static int ValueHandler(void* user, const char* section, const char* name,
-        const char* value);
+                            const char* value);
 };
 
 #endif  // __INIREADER_H__
@@ -377,7 +379,7 @@ inline INIReader::INIReader(std::string filename)
     _error = ini_parse(filename.c_str(), ValueHandler, this);
 }
 
-inline INIReader::INIReader(FILE* file)
+inline INIReader::INIReader(FILE *file)
 {
     _error = ini_parse_file(file, ValueHandler, this);
 }
@@ -448,7 +450,7 @@ inline std::string INIReader::MakeKey(std::string section, std::string name)
 }
 
 inline int INIReader::ValueHandler(void* user, const char* section, const char* name,
-    const char* value)
+                            const char* value)
 {
     INIReader* reader = (INIReader*)user;
     std::string key = MakeKey(section, name);
