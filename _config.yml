@@ -2,5 +2,5 @@ title: Mic Mute To Key
 show_downloads: true
 theme: jekyll-theme-cayman
 github:
-	winx86_url: https://github.com/DocSystem/micmutetokey/releases/latest/download/micmutetokey-x86.exe
-	winx64_url: https://github.com/DocSystem/micmutetokey/releases/latest/download/micmutetokey-x64.exe
+  winx86_url: https://github.com/DocSystem/micmutetokey/releases/latest/download/micmutetokey-x86.exe
+  winx64_url: https://github.com/DocSystem/micmutetokey/releases/latest/download/micmutetokey-x64.exe
